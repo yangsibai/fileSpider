@@ -6,10 +6,8 @@
 var redisHelper = require('../redisHelper');
 exports.redisTest = {
     pushUrl: function (test) {
-        redisHelper.pushUrl('www.baidu.com', function (err) {
-            test.ok(!err);
-            test.done();
-        })
+        redisHelper.pushUrl('www.baidu.com');
+        test.done();
     },
     popUrl: function (test) {
         redisHelper.popUrl(function (err, url) {
@@ -37,5 +35,9 @@ exports.redisTest = {
             test.ok(!result);
             test.done();
         })
+    },
+    displayStatus: function (test) {
+        redisHelper.displayStatus();
+        setTimeout(test.done, 10 * 1000);
     }
 }

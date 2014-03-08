@@ -8,9 +8,11 @@ exports.redisConfig = {
 };
 
 exports.taskConfig = {
-    startUrl: 'http://www.baidu.com',
-    sitePattern: /baidu\.com/i,
-    filePattern: /(jpg|png)/i
+    startUrl: 'http://tieba.baidu.com/f?kw=%C4%A7%CA%DE%CA%C0%BD%E7&fr=index',
+    sitePattern: /tieba\.com/i,
+    filePattern: /(\.jpg|\.png|\.gif)/i,
+    minSizeByKb: 20,
+    maxSizeBykb: 20480
 };
 
 /**
@@ -18,7 +20,7 @@ exports.taskConfig = {
  * @type {{on: boolean, host: string, port: number}}
  */
 exports.proxyConfig = {
-    on: true,
+    on: false,
     host: '127.0.0.1',
     port: 8087
 };

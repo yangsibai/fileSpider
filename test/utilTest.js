@@ -3,6 +3,13 @@
  */
 var resolver = require('../webResolve');
 var util = require('../utils');
+var config = require('../config');
+
+exports.downloadFile = function (test) {
+    resolver.downloadFile('http://www.ireadhome.com/Content/Images/Home/iNote.png', function () {
+        test.done();
+    });
+};
 
 exports.fetchAllLinksTest = function (test) {
     resolver.resolveUrl('https://facebook.com', function (err, allLinks) {
@@ -25,9 +32,3 @@ exports.downloadWorkerTest = function (test) {
     resolver.downloadWorker();
     test.done();
 }
-
-exports.downloadFile = function (test) {
-    resolver.downloadFile('https://pbs.twimg.com/profile_images/1392183965/me_normal.jpg', function () {
-        test.done();
-    });
-};

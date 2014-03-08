@@ -16,23 +16,14 @@ client.on('error', function (err) {
 /**
  *  压入url
  */
-exports.pushUrl = function (url, callback) {
+exports.pushUrl = function (url) {
     hasSpider(url, function (err, result) {
         if (err) {
-            callback(err);
-        }
-        else if (result) {
-            callback(new Error('has spider:' + url));
-        }
-        else {
+            utils.error('redis push url error', err);
+        } else if (!result) {
             client.sadd('urls', url, function (err, reply) {
-                if (callback && typeof callback === 'function') {
-                    if (err) {
-                        callback(err);
-                    }
-                    else {
-                        callback(null);
-                    }
+                if (err) {
+                    utils.error('redis sadd url error', err);
                 }
             });
         }
@@ -45,24 +36,10 @@ exports.pushUrl = function (url, callback) {
  */
 exports.popUrl = function (callback) {
     client.spop('urls', function (err, reply) {
-        if (callback && typeof callback === 'function') {
-            if (err) {
-                callback(err);
-            }
-            else if (!reply) {
-                console.log('没有地址');
-                callback(new Error('没有地址'));
-            }
-            else {
-                addSpider(reply, function (err) {
-                    if (!err) {
-                        callback(null, reply);
-                    }
-                    else {
-                        callback(new Error('add spider error:' + reply));
-                    }
-                })
-            }
+        if (!err && reply) {
+            addSpider(reply, function (err) {
+                callback(null, reply);
+            })
         }
     })
 };
@@ -73,33 +50,33 @@ exports.popUrl = function (callback) {
  * @param @optional callback
  */
 exports.pushFileUrl = function (url, callback) {
-    client.sadd('files', url, function (err) {
-        if (typeof callback === 'function') {
-            if (err) {
-                callback(err);
-            }
-            else {
-                callback(null);
-            }
+    hasDownloaded(url, function (err, result) {
+        if (!err && !result) {
+            client.sadd('files', url, function (err) {
+                if (typeof callback === 'function') {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        callback(null);
+                    }
+                }
+            });
         }
-    });
+    })
 };
 
+/**
+ * pop一个文件地址
+ * @param  {Function} callback [description]
+ * @return {[type]}            [description]
+ */
 exports.popFileUrl = function (callback) {
     client.spop('files', function (err, reply) {
-        if (typeof callback === 'function') {
-            if (err) {
-                callback(err);
-            }
-            else if (!reply) {
-                console.log('没有图片地址');
-                callback(new Error('没有图片地址'));
-            }
-            else {
+        if (!err && reply) {
+            addDownloadedFile(reply, function (err) {
                 callback(null, reply);
-            }
+            })
         }
-
     });
 }
 
@@ -113,8 +90,7 @@ exports.hasSpider = hasSpider = function (url, callback) {
         if (typeof callback === 'function') {
             if (err) {
                 callback(err);
-            }
-            else {
+            } else {
                 callback(null, reply);
             }
         }
@@ -131,10 +107,62 @@ exports.addSpider = addSpider = function (url, callback) {
         if (typeof callback === 'function') {
             if (err) {
                 callback(err);
-            }
-            else {
+            } else {
                 callback(null, reply);
             }
         }
     })
+}
+
+/**
+ * 检测文件是否已经下载过
+ * @param  {[type]}   url  [description]
+ * @param  {Function} callback [description]
+ * @return {Boolean}           [description]
+ */
+exports.hasDownloaded = hasDownloaded = function (url, callback) {
+    client.sismember('downloadedFile', url, function (err, reply) {
+        if (typeof callback === 'function') {
+            if (err) {
+                callback(err);
+            } else {
+                callback(null, reply);
+            }
+        }
+    })
+};
+
+/**
+ * 添加已经下载过的文件信息
+ * @param {[type]}   url      [description]
+ * @param {Function} callback [description]
+ */
+exports.addDownloadedFile = addDownloadedFile = function (url, callback) {
+    client.sadd('downloadedFile', url, function (err, reply) {
+        if (typeof callback === 'function') {
+            if (err) {
+                callback(err);
+            } else {
+                callback(null, reply);
+            }
+        }
+    })
+};
+
+/**
+ * 显示状态
+ * @type {displayStatus}
+ */
+exports.displayStatus = displayStatus = function () {
+    setInterval(function () {
+        client.scard('urls', function (err, urlsCount) {
+            client.scard('files', function (err, filesCount) {
+                client.scard('hasSpider', function (err, spideredCount) {
+                    client.scard('downloadedFile', function (err, downloadedCount) {
+                        console.log('status => urls = ' + urlsCount + " files = " + filesCount + "  spidered = " + spideredCount + "  downloaded = " + downloadedCount);
+                    });
+                })
+            })
+        });
+    }, 3 * 1000);
 }

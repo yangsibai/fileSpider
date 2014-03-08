@@ -1,15 +1,16 @@
-var urlUtil = require('url');
+var urlHelper = require('url');
 var http = require('follow-redirects').http;
 var iconv = require('iconv-lite');
 var BufferHelper = require('bufferhelper');
-var dbHelper = require('./dbHelper');
 var config = require('./config');
+var fs = require('fs'),
+    path = require('path');
 
-exports.log = function () {
+exports.log = log = function () {
     var argu = arguments;
-    var logPath = path.join(__dirname, '..', 'log', utils.currentDate() + '.txt');
+    var logPath = path.join(__dirname, 'log', currentDate() + '.txt');
     fs.exists(logPath, function () {
-        fs.appendFile(logPath, utils.currentTime() + '=>' + [].slice.call(argu).join(' ') + '\n', function (err) {
+        fs.appendFile(logPath, currentTime() + '=>' + [].slice.call(argu).join(' ') + '\n', function (err) {
             if (err) {
                 console.log(err);
             } else {
@@ -20,28 +21,13 @@ exports.log = function () {
 };
 
 /**
- * 记录trace信息
- * @param title
- * @param content
- * @param @optional callback
- */
-exports.trace = function (title, content, callback) {
-    dbHelper.addErrorTrace(title, content, 1, callback);
-};
-
-/**
  * 记录异常
  * @param title
  * @param contentOrError
- * @param @optional callback
  */
-exports.error = function (title, contentOrError, callback) {
-    if (contentOrError instanceof Error) {
-        // contentOrError is a error now
-        dbHelper.addErrorTrace(title + ":" + contentOrError.message, contentOrError.stack, 0, callback);
-    }
-    else {
-        dbHelper.addErrorTrace(title, contentOrError, 0, callback);
+exports.error = function (title, err) {
+    if (err instanceof Error) {
+        log(title + ":" + err.message, err.stack);
     }
 };
 
@@ -51,7 +37,7 @@ exports.error = function (title, contentOrError, callback) {
  * @param callback
  */
 exports.downloadPage = function (url, callback) {
-    var parser = urlUtil.parse(url);
+    var parser = urlHelper.parse(url);
 
     if (config.proxyConfig.on) {
         http.get({
@@ -81,8 +67,7 @@ exports.downloadPage = function (url, callback) {
         }).on('error', function (error) {
                 callback(error);
             });
-    }
-    else {
+    } else {
         http.get({
             hostname: parser.hostname,
             port: 80,
@@ -155,7 +140,36 @@ exports.validUrl = function (input) {
  * 获取当前时间
  * @returns {string}
  */
-exports.currentTime = function () {
+exports.currentTime = currentTime = function () {
     var now = new Date();
     return now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDay() + " " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
 };
+
+/**
+ * 返回当前日期
+ * @type {currentDate}
+ */
+exports.currentDate = currentDate = function () {
+    var now = new Date();
+    return now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDay()
+};
+
+/**
+ * 获取本次任务保存的文件夹，如果不存在，创建
+ * @param callback
+ */
+exports.getSaveFolder = function (callback) {
+    var url = config.taskConfig.startUrl;
+    var hostName = urlHelper.parse(url).hostname;
+    var dir = path.join(__dirname, 'file', hostName);
+    fs.stat(dir, function (err, stats) {
+        if (err || !stats.isDirectory()) {
+            fs.mkdir(dir, function () {
+                callback(dir);
+            });
+        }
+        else {
+            callback(dir);
+        }
+    });
+}
