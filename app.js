@@ -4,10 +4,12 @@ var resolver = require('./webResolve');
 
 var cronJob = require('cron').CronJob; //任务计划管理
 
-cluster = require('cluster');
+var cluster = require('cluster');
 
 process.on('uncaughtException', function(err) {
     console.log(err);
+    console.log(err.message);
+    console.log(err.stack);
     console.log('node not exiting');
 })
 
