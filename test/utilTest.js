@@ -5,14 +5,30 @@ var resolver = require('../webResolve');
 var util = require('../utils');
 var config = require('../config');
 
+exports.workerTest=function(test){
+    resolver.worker();
+    test.done();
+}
+
+exports.downloadWorkerTest = function (test) {
+    resolver.downloadWorker();
+    test.done();
+}
+
+exports.downloadWorkerTest = function (test) {
+    resolver.resolveUrl('http://www.baidu.com', function () {
+        test.done();
+    });
+}
+
 exports.downloadFile = function (test) {
-    resolver.downloadFile('http://www.ireadhome.com/Content/Images/Home/iNote.png', function () {
+    resolver.downloadFile('http://www.baidu.com', function () {
         test.done();
     });
 };
 
 exports.fetchAllLinksTest = function (test) {
-    resolver.resolveUrl('https://facebook.com', function (err, allLinks) {
+    resolver.resolveUrl('http://www.baidu.com', function (err, allLinks) {
         test.ok(!err);
         test.ok(allLinks.length > 0);
         console.log(allLinks.length);
@@ -27,8 +43,3 @@ exports.downloadPageTest = function (test) {
         test.done();
     });
 };
-
-exports.downloadWorkerTest = function (test) {
-    resolver.downloadWorker();
-    test.done();
-}
