@@ -8,11 +8,12 @@ exports.redisConfig = {
 };
 
 exports.taskConfig = {
-    startUrl: 'http://tieba.baidu.com/f?kw=%C4%A7%CA%DE%CA%C0%BD%E7&fr=index',
-    sitePattern: /tieba\.com/i,
-    filePattern: /(\.jpg|\.png|\.gif)/i,
-    minSizeByKb: 20,
-    maxSizeBykb: 20480
+    startUrl: 'http://zhihu.com',
+    sitePattern: /zhihu\.com/i,
+    filePattern: /(\.[a-z0-9]{1,5})$/i,
+    minSizeByKb: 30,
+    maxSizeBykb: 20480,
+    keepName: true
 };
 
 /**
@@ -20,7 +21,7 @@ exports.taskConfig = {
  * @type {{on: boolean, host: string, port: number}}
  */
 exports.proxyConfig = {
-    on: false,
+    on: true,
     host: '127.0.0.1',
     port: 8087
 };
