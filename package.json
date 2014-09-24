@@ -1,0 +1,11 @@
+{
+  "name": "filespider",
+  "version": "0.0.1",
+  "dependencies": {
+    "bufferhelper": "^0.2.0",
+    "follow-redirects": "0.0.3",
+    "iconv-lite": "^0.4.4",
+    "node-uuid": "^1.4.1",
+    "redis": "^0.12.1"
+  }
+}
