@@ -11,7 +11,7 @@ process.on('uncaughtException', function(err) {
     console.log(err.message);
     console.log(err.stack);
     console.log('node not exiting');
-})
+});
 
 if (cluster.isMaster) {
     resolver.init(function(err) {
